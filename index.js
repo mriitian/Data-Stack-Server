@@ -2,11 +2,11 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import { validationResult } from "express-validator";
-import { configDotenv } from "dotenv";
+import dotenv from "dotenv";
+dotenv.config();
 
 const port = process.env.PORT || 3000;
-const uri =
-  "mongodb+srv://vedant_parkhe:AshPika18@datastack.uawvg.mongodb.net/datastack?retryWrites=true&w=majority&appName=datastack";
+const uri = process.env.ATLAS_URI;
 
 const app = express();
 app.set("view engine", "ejs");
