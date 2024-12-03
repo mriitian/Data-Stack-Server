@@ -4,12 +4,42 @@ import cors from "cors";
 import { validationResult } from "express-validator";
 import dotenv from "dotenv";
 dotenv.config();
+import { MongoClient } from "mongodb";
 
 const port = process.env.PORT || 3000;
-const uri = process.env.ATLAS_URI;
+const uri =
+  "mongodb+srv://vedant_parkhe:AshPika18@datastack.uawvg.mongodb.net/?retryWrites=true&w=majority&appName=datastack";
 
 const app = express();
 app.set("view engine", "ejs");
+
+async function getUsers() {
+  const client = new MongoClient(uri);
+  try {
+    await client.connect();
+    const database = client.db("datastack"); // Replace with your actual database name
+    const usersCollection = database.collection("users");
+    const users = await usersCollection.find().toArray();
+    return users; // Return the users data
+  } finally {
+    await client.close();
+  }
+}
+getUsers();
+
+async function getTeams() {
+  const client = new MongoClient(uri);
+  try {
+    await client.connect();
+    const database = client.db("datastack"); // Replace with your actual database name
+    const usersCollection = database.collection("teams");
+    const users = await usersCollection.find().toArray();
+    return users; // Return the users data
+  } finally {
+    await client.close();
+  }
+}
+getTeams();
 
 // Mongoose model for User
 const User = mongoose.model(
@@ -25,7 +55,7 @@ const User = mongoose.model(
       domain: String,
       available: Boolean,
     },
-    { collection: "users" }
+    { collection: "users", strict: false }
   )
 );
 
@@ -49,12 +79,47 @@ app.listen(port, () => {
 });
 
 mongoose
-  .connect(uri)
+  .connect(uri, { dbName: "datastack" })
   .then(() => {
     console.log("MongoDB Connection Established");
   })
   .catch((e) => console.log("Connection Failed", e.message));
 
+// app.get("/api/allusersdirect", async (req, res) => {
+//   try {
+//     const allUsers = await getUsers();
+//     console.log("Fetched Users:", allUsers); // Debugging: log the fetched data
+//     res.json(allUsers);
+//   } catch (error) {
+//     console.error("Error retrieving all users:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
+// app.get("/test-mongoose", async (req, res) => {
+//   try {
+//     console.log("Fetching users via Mongoose...");
+//     const users = await User.find(); // Fetch all users
+//     console.log("Fetched users:", users); // Log fetched data for debugging
+//     res.json(users);
+//   } catch (error) {
+//     console.error("Error with Mongoose query:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
+
+// app.get("/test-direct", async (req, res) => {
+//   try {
+//     const database = mongoose.connection.db;
+//     const collection = database.collection("users");
+//     console.log(collection);
+//     const users = await collection.find({}).toArray();
+//     console.log("Direct query results:", users);
+//     res.json(users);
+//   } catch (error) {
+//     console.error("Error with direct MongoDB query:", error);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
 app.get("/attribute", async (req, res) => {
   const filteredUsers = await User.find();
   const domain = [];
@@ -122,6 +187,7 @@ app.get("/api/allusers", async (req, res) => {
         { last_name: { $regex: input, $options: "i" } },
       ],
     });
+    console.log(filteredUsers);
     const fil = await User.find({
       $or: [
         { first_name: { $regex: input, $options: "i" } },
