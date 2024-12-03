@@ -7,8 +7,7 @@ dotenv.config();
 import { MongoClient } from "mongodb";
 
 const port = process.env.PORT || 3000;
-const uri =
-  "mongodb+srv://vedant_parkhe:AshPika18@datastack.uawvg.mongodb.net/?retryWrites=true&w=majority&appName=datastack";
+const uri = process.env.ATLAS_URI;
 
 const app = express();
 app.set("view engine", "ejs");
